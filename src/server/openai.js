@@ -54,7 +54,7 @@ async function generateQuestions(chat, topic, count) {
       choices: q.choices,
       answer: q.answer
     }));
-  } catch {
+  } catch (e) {
     throw new Error(`failed to generate questions, error: ${e}, response: ${res.choices[0].message.content}`, { cause: 'failed_generate_questions' });
   }
 }

@@ -69,7 +69,7 @@ class App extends Component {
         </>;
       case 'started':
         return <PlayGame game={this._game} user={this.state.user} />;
-      case 'ended': 
+      case 'ended':
         return <EndGame game={this._game} user={this.state.user} />;
     }
   }

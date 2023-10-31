@@ -97,16 +97,21 @@ let players = {};
 let currentQuestion;
 let currentScore = 0;
 
-function updateLeaderboard(id, socket) {
+function updateLeaderboard(id, score, socket) {
   let l = Object.keys(players).map(i => ({
     id: i,
-    name: players[i].name,
-    score: players[i].score.reduce((a, b) => a + b, 0)
+    name: players[i].user.name,
+    avatar: players[i].user.avatar,
+    totalScore: players[i].score.reduce((a, b) => a + b, 0)
   })).sort((a, b) => {
-    if (a.score === b.score) return a.name.localeCompare(b.name);
-    else return b.score - a.score;
+    if (a.totalScore === b.totalScore) return a.name.localeCompare(b.name);
+    else return b.totalScore - a.totalScore;
   }).slice(0, 4);
-  if (id && l.findIndex(p => p.id === id) === -1) return;
+  if (id) {
+    let i = l.findIndex(p => p.id === id);
+    if (i === -1) return;
+    l[i].score = score;
+  }
   (socket || io).emit('leaderboard', l);
 }
 
@@ -118,29 +123,30 @@ function updateStatus(socket) {
 }
 
 io.on('connection', socket => {
-  if (!socket.request.user) {
+  let u = socket.request.user;
+  if (!u) {
     socket.disconnect();
     return;
   }
 
-  let id = socket.request.user.id;
-  let name = socket.request.user.name;
+  let id = u.id;
+  let name = u.name;
   console.log(`${name} connected`);
 
-  if (!players[id]) players[id] = { name, score: [], answer: [], online: true };
+  if (!players[id]) players[id] = { user: u, score: [], answer: [], online: true };
   else {
-    players[id].name = name;
+    players[id].user = u;
     players[id].online = true;
   }
   socket.on('disconnect', () => {
-    players[id].online = false
+    players[id].online = false;
     console.log(`${name} disconnected`);
     io.emit('players', Object.values(players).filter(p => p.online).length);
   });
 
   io.emit('players', Object.values(players).filter(p => p.online).length);
   updateStatus(socket);
-  updateLeaderboard(undefined, socket);
+  updateLeaderboard(undefined, undefined, socket);
   socket.emit('score', players[id].score.reduce((a, b) => a + b, 0));
   if (currentQuestion) {
     let { answer, ...q } = currentQuestion;
@@ -166,12 +172,12 @@ io.on('connection', socket => {
       console.log(`player ${name} got ${currentScore}`);
       socket.emit('checkAnswer', { index, correct: true, score: currentScore });
       socket.emit('score', players[id].score.reduce((a, b) => a + b, 0));
-      updateLeaderboard(id);
+      updateLeaderboard(id, currentScore);
     } else {
       players[id].score[index] = 0;
       console.log(`player ${name} got 0`);
       socket.emit('checkAnswer', { index, correct: false });
-      updateLeaderboard(id);
+      updateLeaderboard(id, 0);
     }
   }));
 
@@ -197,6 +203,7 @@ io.on('connection', socket => {
 
     console.log('game started');
     updateStatus();
+    io.emit('score', 0);
     updateLeaderboard();
     for (let i = 0; ; i++, await sleep(3000)) {
       let q = game.nextQuestion();
