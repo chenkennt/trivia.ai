@@ -73,12 +73,10 @@ app
     else res.status(401).end();
   })
   .get('/login', passport.authenticate('github', { scope: ['user:email'] }))
-  .get('/login/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
-    res.redirect('/');
-  })
-  .post('/login/secret', (req, res) => {
+  .get('/login/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => res.redirect('/'))
+  .post('/login/bot', (req, res) => {
     if (req.body.secret !== process.env.LOGIN_SECRET) return res.status(401).end();
-    req.login({ id: req.body.id, name: req.body.name }, e => {
+    req.login({ id: req.body.id, name: req.body.name, cheat: true }, e => {
       if (!e) res.status(204).end();
       else res.status(500).end();
     });
@@ -132,6 +130,7 @@ io.on('connection', socket => {
   let id = u.id;
   let name = u.name;
   console.log(`${name} connected`);
+  if (u.cheat) socket.join('cheat');
 
   if (!players[id]) players[id] = { user: u, score: [], answer: [], online: true };
   else {
@@ -214,6 +213,13 @@ io.on('connection', socket => {
         index: i,
         question: q.question,
         choices: q.choices
+      });
+      // send correct answer to bots so they can become more competitive
+      io.to('cheat').emit('completeQuestion', {
+        index: i,
+        question: q.question,
+        choices: q.choices,
+        answer: q.answer
       });
       for (currentScore = 10; currentScore > 0; await sleep(1000), currentScore--)
         io.emit('countdown', currentScore);

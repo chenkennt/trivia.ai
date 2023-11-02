@@ -221,9 +221,24 @@ button {
   font-size: 1.1rem;
 }
 
-.winner {
+.winner img {
   border-radius: 50%;
   width: 9rem;
+  height: 9rem;
   border: solid 0.3rem var(--text-color);
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
+}
+
+.winner .bi-person-circle {
+  font-size: 9rem;
+}
+
+.score {
+  filter: opacity(1);
+}
+
+.score.visible {
+  text-shadow: 0 0 0.1rem rgba(0, 0, 0, 0.5);
+  transition: filter 2s cubic-bezier(1, -0.4, 0.8, 0.4);
+  filter: opacity(0);
 }

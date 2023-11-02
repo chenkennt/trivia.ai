@@ -61,7 +61,7 @@ class Leaderboard extends Component {
               }
               {p.name}
               {!this.props.static &&
-                <span className="score">
+                <span className={cx('score', { visible: p.score !== undefined })}>
                   {p.score > 0 && <><span className="emoji">😁</span>+{p.score}</>}
                   {p.score === 0 && <span className="emoji">😟</span>}
                 </span>

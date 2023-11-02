@@ -17,8 +17,14 @@ class EndGame extends Component {
 
   renderResult() {
     return <>
-      <div className="mb-2">Winner is</div>
-      <img className="winner" src={this.state.winner?.avatar}/>
+      <div className="mb-2 big-text">Winner is</div>
+      <div className="winner">
+        {this.state.winner?.avatar ?
+          <img src={this.state.winner?.avatar} />
+          :
+          <i className="bi bi-person-circle" />
+        }
+      </div>
       <div className="mb-2 big-text">{this.state.winner?.name}</div>
       {this.state.place === 0 && <div className="mb-2">You won!</div>}
       {this.state.place > 0 && <div className="mb-2">You got {['2nd', '3rd', '4th'][this.state.place - 1]} place</div>}
