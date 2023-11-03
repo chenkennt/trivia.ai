@@ -8,7 +8,8 @@
     "start": "node src/server/index.js",
     "build": "webpack build --mode production",
     "dev": "webpack build --mode development",
-    "watch": "webpack watch --mode development"
+    "watch": "webpack watch --mode development",
+    "bot": " node src/server/bot.js"
   },
   "keywords": [],
   "author": "",

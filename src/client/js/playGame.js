@@ -30,12 +30,12 @@ class PlayGame extends Component {
         <div className="mb-2 big-text">{this.state.answer || this.state.countdown}</div>
         {this.state.choices.map((c, i) =>
           <div className="mb-2" key={i}>
-            <button disabled={this.state.userAnswer || this.state.answer} className={cx('choice', { correct: this.state.userAnswer === c && this.state.correct, incorrect: this.state.userAnswer === c && !this.state.correct })} onClick={() => {
+            <button disabled={this.state.userAnswer || this.state.answer} className={cx('choice', { correct: this.state.userAnswer === c && this.state.correct, incorrect: this.state.userAnswer === c && this.state.correct === false })} onClick={() => {
               this.setState({ userAnswer: c });
               this.props.game.answer(this.state.index, c);
             }}>
               {this.state.userAnswer === c && this.state.correct && <i className="bi bi-check-circle-fill" />}
-              {this.state.userAnswer === c && !this.state.correct && <i className="bi bi-x-circle-fill" />}
+              {this.state.userAnswer === c && this.state.correct === false && <i className="bi bi-x-circle-fill" />}
               {c}
               {this.state.userAnswer === c && this.state.score !== undefined && <span className="score">+{this.state.score}</span>}
             </button>

@@ -12,11 +12,12 @@ function sleep(ms) {
 }
 
 function random(n) {
-  return new Array(9).fill(0).map(() => Math.random()).filter(i => i < n / 10 + 0.05).length;
+  let v = Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
+  return Math.max(Math.min(Math.round(v + n), 10), 1);
 }
 
 function random2(n) {
-  return n - Math.floor(Math.pow(Math.random(), 2) * n);
+  return Math.floor(Math.random() * n) + 1;
 }
 
 async function connect(strength, speed) {
@@ -30,7 +31,7 @@ async function connect(strength, speed) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      id: name.replace(' ', '').toLocaleLowerCase(),
+      id: name.replace(' ', '').toLocaleLowerCase() + Math.floor(Math.random() * 1000),
       name,
       secret: process.env.LOGIN_SECRET
     })

@@ -101,10 +101,7 @@ function updateLeaderboard(id, score, socket) {
     name: players[i].user.name,
     avatar: players[i].user.avatar,
     totalScore: players[i].score.reduce((a, b) => a + b, 0)
-  })).sort((a, b) => {
-    if (a.totalScore === b.totalScore) return a.name.localeCompare(b.name);
-    else return b.totalScore - a.totalScore;
-  }).slice(0, 4);
+  })).sort((a, b) => b.totalScore - a.totalScore || (players[a.id].date || 0) - (players[b.id].date || 0) || a.name.localeCompare(b.name)).slice(0, 4);
   if (id) {
     let i = l.findIndex(p => p.id === id);
     if (i === -1) return;
@@ -129,7 +126,7 @@ io.on('connection', socket => {
 
   let id = u.id;
   let name = u.name;
-  console.log(`${name} connected`);
+  console.log(`${name} (${id}) connected`);
   if (u.cheat) socket.join('cheat');
 
   if (!players[id]) players[id] = { user: u, score: [], answer: [], online: true };
@@ -139,7 +136,7 @@ io.on('connection', socket => {
   }
   socket.on('disconnect', () => {
     players[id].online = false;
-    console.log(`${name} disconnected`);
+    console.log(`${name} (${id}) disconnected`);
     io.emit('players', Object.values(players).filter(p => p.online).length);
   });
 
@@ -168,6 +165,7 @@ io.on('connection', socket => {
     players[id].answer[index] = answer;
     if (answer === currentQuestion.answer) {
       players[id].score[index] = currentScore;
+      players[id].date = Date.now();
       console.log(`player ${name} got ${currentScore}`);
       socket.emit('checkAnswer', { index, correct: true, score: currentScore });
       socket.emit('score', players[id].score.reduce((a, b) => a + b, 0));
@@ -186,6 +184,7 @@ io.on('connection', socket => {
       else {
         players[k].score = [];
         players[k].answer = [];
+        players[k].date = undefined;
       }
     }
 

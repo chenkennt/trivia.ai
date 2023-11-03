@@ -15,6 +15,7 @@ class Leaderboard extends Component {
   }
 
   updateLeaderboard(leaderboard) {
+    leaderboard = [...leaderboard]; // copy leaderboard to prevent mutating the original
     let score = this.state.leaderboard.find(p => p.id === this.props.user.id)?.totalScore || 0;
     if (leaderboard.findIndex(p => p.id === this.props.user.id) === -1) leaderboard[3] = { ...this.props.user, totalScore: score, noRank: true };
     this.state.leaderboard.forEach(p => p.updated = false);

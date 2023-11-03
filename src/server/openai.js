@@ -26,6 +26,15 @@ function createAzureOpenAIChat(name, deployment, key) {
   });
 }
 
+function shuffle(array) {
+  let a = [...array];
+  for (let i = a.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 async function generateQuestions(chat, topic, count) {
   let res = await chat([{
     role: 'system',
@@ -51,7 +60,7 @@ async function generateQuestions(chat, topic, count) {
     });
     return qs.map(q => ({
       question: q.question,
-      choices: q.choices,
+      choices: shuffle(q.choices), // sometimes ChatGPT will always return the correct answer as the first choice, so we shuffle the choices to avoid this
       answer: q.answer
     }));
   } catch (e) {
