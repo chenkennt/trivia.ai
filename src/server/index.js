@@ -2,10 +2,11 @@ import http from 'http';
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import { Strategy as GitHubStrategy } from 'passport-github2';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
 import { createAzureOpenAIChat } from './openai.js';
+// import { initializeAuth } from './auth/entraID.js';
+import { initializeAuth } from './auth/github.js';
 import { Game } from './game.js';
 
 dotenv.config();
@@ -43,20 +44,6 @@ app.use(p);
 let ps = passport.session();
 app.use(ps);
 
-passport.use(new GitHubStrategy(
-  {
-    clientID: process.env.GITHUB_CLIENT_ID,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET
-  },
-  (accessToken, refreshToken, profile, cb) => {
-    return cb(null, {
-      id: profile.username,
-      name: profile.displayName || profile.username,
-      avatar: profile._json.avatar_url
-    });
-  }
-));
-
 passport.serializeUser((user, cb) => {
   users[user.id] = user;
   cb(null, user.id);
@@ -67,13 +54,13 @@ passport.deserializeUser((id, cb) => {
   else cb(new Error('user not found'));
 });
 
+initializeAuth(app, passport);
+
 app
   .get('/user', (req, res) => {
     if (req.user) res.send(req.user);
     else res.status(401).end();
   })
-  .get('/login', passport.authenticate('github', { scope: ['user:email'] }))
-  .get('/login/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => res.redirect('/'))
   .post('/login/bot', (req, res) => {
     if (req.body.secret !== process.env.LOGIN_SECRET) return res.status(401).end();
     req.login({ id: req.body.id, name: req.body.name, cheat: true }, e => {

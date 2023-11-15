@@ -4,7 +4,7 @@ import cx from 'classnames';
 class Leaderboard extends Component {
   state = {
     players: 0,
-    leaderboard: new Array(8).fill(0).map(() => ({ pos: 4 }))
+    leaderboard: new Array(8).fill(0).map((e, i) => ({ pos: Math.min(i, 4) }))
   };
 
   componentDidMount() {
@@ -22,7 +22,7 @@ class Leaderboard extends Component {
     leaderboard.forEach((p, i) => {
       let j = this.state.leaderboard.findIndex(l => l.id === p.id);
       if (j < 0) {
-        j = this.state.leaderboard.findIndex(l => l.pos === 4);
+        j = this.state.leaderboard.findIndex(l => !l.id || l.pos === 4);
         this.state.leaderboard[j] = { ...p, pos: i, updated: true };
       } else Object.assign(this.state.leaderboard[j], { ...p, pos: i, updated: true, noRank: p.noRank });
       if (p.score !== undefined) this.updateScore(this.state.leaderboard[j], p.score);

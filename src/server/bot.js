@@ -4,7 +4,7 @@ import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generato
 
 dotenv.config();
 
-const count = Number.parseInt(process.argv[4] || '10');
+const count = Number.parseInt(process.argv[4] || 10);
 const endpoint = process.argv[5] || 'http://localhost:3000';
 
 function sleep(ms) {
@@ -22,24 +22,21 @@ function random2(n) {
 
 async function connect(strength, speed) {
   let name = uniqueNamesGenerator({
-    dictionaries: [ adjectives, animals ],
+    dictionaries: [adjectives, animals],
     separator: ' ',
     style: 'capital'
   });
+  let id = name.replace(' ', '').toLocaleLowerCase() + Math.floor(Math.random() * 1000);
 
   let res = await fetch(`${endpoint}/login/bot`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      id: name.replace(' ', '').toLocaleLowerCase() + Math.floor(Math.random() * 1000),
-      name,
-      secret: process.env.LOGIN_SECRET
-    })
+    body: JSON.stringify({ id, name, secret: process.env.LOGIN_SECRET })
   });
 
   if (res.status !== 204) throw new Error('failed to login');
   let cookie = res.headers.get('set-cookie').split(';')[0];
-  console.log(`connected as ${name} with strength ${strength} and speed ${speed}`);
+  console.log(`connected as ${name} (${id}) with strength ${strength} and speed ${speed}`);
 
   let socket = io(endpoint, { path: '/trivia', extraHeaders: { cookie } });
   socket.on('completeQuestion', async a => {

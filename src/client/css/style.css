@@ -200,6 +200,7 @@ button {
   height: 1.3rem;
   border-radius: 50%;
   margin-right: 0.5rem;
+  object-fit: cover;
 }
 
 .leaderboard .bi-person-circle {
@@ -227,6 +228,7 @@ button {
   height: 9rem;
   border: solid 0.3rem var(--text-color);
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
+  object-fit: cover;
 }
 
 .winner .bi-person-circle {
