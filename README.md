@@ -19,7 +19,7 @@ Trivia.AI is a browser game that allows multiple players to compete with each ot
    export GITHUB_CLIENT_SECRET=<your_github_app_client_secret>
    ```
 
-   If you're using Azure OpenAI service, use the following instead of `OPENAI_API_KEY`:
+   If you're using Azure OpenAI service, change `createOpenAIChat()` to `createAzureOpenAIChat()` in [index.js](src/server/index.js) and use the following configuration instead of `OPENAI_API_KEY`:
 
    ```
    export AZURE_OPENAI_RESOURCE_NAME=<your_azure_openai_resource_name>

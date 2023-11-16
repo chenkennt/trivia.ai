@@ -4,9 +4,9 @@ import session from 'express-session';
 import passport from 'passport';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
-import { createAzureOpenAIChat } from './openai.js';
-// import { initializeAuth } from './auth/entraID.js';
+import { createAzureOpenAIChat, createOpenAIChat } from './openai.js';
 import { initializeAuth } from './auth/github.js';
+// import { initializeAuth } from './auth/entraID.js';
 import { Game } from './game.js';
 
 dotenv.config();
@@ -75,7 +75,9 @@ io.use(wrap(s));
 io.use(wrap(p));
 io.use(wrap(ps));
 
-let chat = createAzureOpenAIChat(process.env.AZURE_OPENAI_RESOURCE_NAME, process.env.AZURE_OPENAI_DEPLOYMENT_NAME, process.env.AZURE_OPENAI_API_KEY);
+
+let chat = createOpenAIChat('gpt-3.5-turbo', process.env.OPENAI_API_KEY);
+// let chat = createAzureOpenAIChat(process.env.AZURE_OPENAI_RESOURCE_NAME, process.env.AZURE_OPENAI_DEPLOYMENT_NAME, process.env.AZURE_OPENAI_API_KEY);
 let game = new Game(chat);
 
 let players = {};

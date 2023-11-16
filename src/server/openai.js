@@ -13,6 +13,7 @@ function createOpenAIChat(model, key) {
 
 function createAzureOpenAIChat(name, deployment, key) {
   let ai = new OpenAI({
+    apiKey: key, // not useful, but required by OpenAI SDK
     baseURL: `https://${name}.openai.azure.com/openai/deployments/${deployment}`,
     defaultHeaders: { 'api-key': key },
     defaultQuery: { 'api-version': '2023-03-15-preview' }

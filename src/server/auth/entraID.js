@@ -7,7 +7,6 @@ function initializeAuth(app, passport) {
     {
       clientID: process.env.ENTRA_ID_CLIENT_ID,
       clientSecret: process.env.ENTRA_ID_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/login/callback',
       resource: '00000003-0000-0000-c000-000000000000',
       tenant: process.env.ENTRA_ID_TENANT
     },
