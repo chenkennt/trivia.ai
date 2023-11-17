@@ -8,9 +8,16 @@ import '../css/style.css';
 
 class Game {
   constructor() {
-    this._socket = io({ path: '/trivia' });
     this._states = {};
     this._callbacks = {};
+  }
+
+  async connect() {
+    let res = await fetch('/negotiate');
+    if (res.ok) {
+      let { endpoint, path, token } = await res.json();
+      this._socket = io(endpoint, { path, query: { access_token: token } });
+    } else this._socket = io({ path: '/trivia' });
     this.registerEvent('players', 'status', 'score', 'question', 'leaderboard', 'answer', 'countdown', 'checkAnswer');
   }
 
@@ -47,6 +54,7 @@ class App extends Component {
     let res = await fetch('/user');
     if (res.status === 200) {
       this._game = new Game();
+      await this._game.connect();
       this._game.on('status', status => this.setState({ status: status.status, topic: status.topic }));
       let user = await res.json();
       this.setState({ user });

@@ -49,6 +49,18 @@ export ENTRA_ID_CLIENT_SECRET=<your_entra_id_client_secret>
 export ENTRA_ID_TENANT=<your_entra_id_tenant>
 ```
 
+## Using Azure Web PubSub for Socket.IO
+
+The real-time communication (like the live updates of leaderboard) of this game is implemented using [Socket.IO](https://socket.io). [Azure Web PubSub for Socket.IO](https://learn.microsoft.com/azure/azure-web-pubsub/socketio-overview) is a managed solution for Socket.IO so you don't need to deal with the complexities like scalability when there're more and more players.
+
+To use Azure Web PubSub for Socket.IO, just uncomment `initializeAzureSocketIO()` in [index.js](src/server/index.js).
+
+You also need to have an Azure Web PubSub for Socket.IO resource and set its connection string as environment variable:
+
+```
+export AZURE_WEB_PUBSUB_CONNECTION_STRING=<your_azure_web_pubsub_connection_string>
+```
+
 ## Using bots
 
 If you want to play it alone, there is also a bot script that can generate some bots to play together with you to make the game more fun. To use the bot:

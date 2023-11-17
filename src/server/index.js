@@ -4,6 +4,7 @@ import session from 'express-session';
 import passport from 'passport';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
+import { negotiate, usePassport, restorePassport, useAzureSocketIO } from '@azure/web-pubsub-socket.io';
 import { createAzureOpenAIChat, createOpenAIChat } from './openai.js';
 import { initializeAuth } from './auth/github.js';
 // import { initializeAuth } from './auth/entraID.js';
@@ -71,10 +72,22 @@ app
 
 const io = new Server(server, { path: '/trivia' });
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
+
+function initializeAzureSocketIO() {
+  useAzureSocketIO(io, {
+    hub: 'trivia',
+    connectionString: process.env.AZURE_WEB_PUBSUB_CONNECTION_STRING
+  });
+
+  io.use(wrap(restorePassport()));
+  app.get('/negotiate', negotiate(io, usePassport()));
+}
+
+// initializeAzureSocketIO(); // this has to be called before other socket.io middlewares
+
 io.use(wrap(s));
 io.use(wrap(p));
 io.use(wrap(ps));
-
 
 let chat = createOpenAIChat('gpt-3.5-turbo', process.env.OPENAI_API_KEY);
 // let chat = createAzureOpenAIChat(process.env.AZURE_OPENAI_RESOURCE_NAME, process.env.AZURE_OPENAI_DEPLOYMENT_NAME, process.env.AZURE_OPENAI_API_KEY);
@@ -106,6 +119,24 @@ function updateStatus(socket) {
   });
 }
 
+let playerQueue = [];
+let updatingPlayers = false;
+
+function updatePlayers() {
+  // restrict player update to no more than twice a second, mainly for two reasons:
+  // 1. player update is heavy so should not be too often
+  // 2. message order is depending on socket.io adapter implementation, frequent update may cause message out of order
+  playerQueue.push(Object.values(players).filter(p => p.online).length);
+  if (updatingPlayers) return;
+  updatingPlayers = true;
+  sleep(500).then(() => {
+    let p = playerQueue.pop();
+    playerQueue = [];
+    if (p !== undefined) io.emit('players', p);
+    updatingPlayers = false;
+  });
+}
+
 io.on('connection', socket => {
   let u = socket.request.user;
   if (!u) {
@@ -126,10 +157,10 @@ io.on('connection', socket => {
   socket.on('disconnect', () => {
     players[id].online = false;
     console.log(`${name} (${id}) disconnected`);
-    io.emit('players', Object.values(players).filter(p => p.online).length);
+    updatePlayers();
   });
 
-  io.emit('players', Object.values(players).filter(p => p.online).length);
+  updatePlayers();
   updateStatus(socket);
   updateLeaderboard(undefined, undefined, socket);
   socket.emit('score', players[id].score.reduce((a, b) => a + b, 0));
